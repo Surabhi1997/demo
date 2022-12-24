@@ -1,40 +1,37 @@
 package com.example.demo.controller;
 
-
-import java.util.List;
-import java.util.Optional;
-
+import com.example.demo.dto.LoginRequest;
+import com.example.demo.dto.LoginResponse;
+import com.example.demo.model.User;
+import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-//import com.example.demo.feign.ProductManufacturerProxyForUser;
-//import com.example.demo.model.ProductResponse;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+import javax.validation.Valid;
+import java.io.IOException;
+
+
+@RestController
+@RequestMapping("/users")
+@Validated
 public class UserController {
-	
-//	@Autowired
-//	ProductManufacturerProxyForUser proxy;
+    @Autowired
+    UserService userService;
 
-    @RequestMapping(value = {"/dashboard"}, method = RequestMethod.GET)
-    public String homePage(){
-        return "user/dashboard";
+
+    @PostMapping
+    public LoginResponse loginUser(@RequestBody LoginRequest loginRequest) throws IOException {
+       return userService.loginUser(loginRequest);
+
     }
-    
-//    @GetMapping("/getAllProductFromManufacturer")
-//    public List<ProductResponse> getAllProductfromManufacturer()
-//    {
-//    	return proxy.getAllProductsFromProductManufacturer();
-//    }
-//    
-//    @GetMapping("/getproductbyid/{pid}")
-//	public Optional<ProductResponse> getProduct(@PathVariable int pid)
-//	{
-//    	return proxy.getProduct(pid);
-//	}
-//    
+
+    @PostMapping("/signup")
+    public ResponseEntity<User> registerUser(@Valid @RequestBody User user) {
+       User savedUser =  userService.saveUser(user);
+        return new ResponseEntity<User>(savedUser, HttpStatus.CREATED);
+    }
 }

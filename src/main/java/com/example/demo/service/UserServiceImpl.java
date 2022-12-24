@@ -1,81 +1,50 @@
 package com.example.demo.service;
 
-
-//import com.example.demo.model.ProductResponse;
+import com.example.demo.constant.AppConstant;
+import com.example.demo.dto.LoginRequest;
+import com.example.demo.dto.LoginResponse;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
 import java.util.Optional;
 
-@Service
-public class UserServiceImpl implements UserService, UserDetailsService {
 
-    @Autowired
-    BCryptPasswordEncoder bCryptPasswordEncoder;
+@Slf4j
+@Service
+public class UserServiceImpl implements UserService {
 
     @Autowired
     UserRepository userRepository;
 
-    @Override
-    public void saveUser(User user) {
-        String encodedPassword = bCryptPasswordEncoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
-//        user.setRole(Role.USER);
-        userRepository.save(user);
-    }
+    @Autowired
+    TokenService tokenService;
 
     @Override
-    public List<Object> isUserPresent(User user) {
-        boolean userExists = false;
-        String message = null;
-        Optional<User> existingUserEmail = userRepository.findByEmail(user.getEmail());
-        if(existingUserEmail.isPresent()){
-            userExists = true;
-            message = "Email Already Present!";
-        }
-        Optional<User> existingUserMobile = userRepository.findByMobile(user.getMobile());
-        if(existingUserMobile.isPresent()){
-            userExists = true;
-            message = "Mobile Number Already Present!";
-        }
-        if (existingUserEmail.isPresent() && existingUserMobile.isPresent()) {
-            message = "Email and Mobile Number Both Already Present!";
-        }
-        System.out.println("existingUserEmail.isPresent() - "+existingUserEmail.isPresent()+"existingUserMobile.isPresent() - "+existingUserMobile.isPresent());
-        return Arrays.asList(userExists, message);
+    public User saveUser(User user) {
+        log.info("Going to save Users..");
+        return userRepository.save(user);
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email).orElseThrow(
-                ()-> new UsernameNotFoundException(
-                        String.format("USER_NOT_FOUND", email)
-                ));
+    public LoginResponse loginUser(LoginRequest loginRequest) throws IOException {
+        String success = "Invalid User";
+        String token = null;
+        Optional<User> userByEmailFromDb = userRepository.findByEmail(loginRequest.getUsername());
+        if(userByEmailFromDb.isPresent())
+        {
+            String password = userByEmailFromDb.get().getPassword();
+            if(loginRequest.getPassword().equals(password))
+            {
+                token = tokenService.getToken();
+                success  = "Valid User";
+            }
+        }
+        return LoginResponse.builder()
+                .message(success)
+                .token(token)
+                .build();
     }
-
-//
-//	public String addProductFromProductManufacturer(ProductResponse product) {
-//		String statusMsg = "";
-//		try {
-//			ProductResponse toBeAdded = new ProductResponse();
-//			toBeAdded.setProductResponseId(product.getProductResponseId());
-//			toBeAdded.setProductResponseName(product.getProductResponseName());
-//			toBeAdded.setProductResponsePrice(product.getProductResponsePrice());
-//			
-//			userRepository.save(toBeAdded);
-//			statusMsg = "Data inserted succesfully";
-//		} catch (Exception e) {
-//			statusMsg = "Exception occured during data insertion";
-//		}
-//		return statusMsg;
-//	}
-      
 }
