@@ -35,7 +35,7 @@ public class User {
             strategy = GenerationType.SEQUENCE,
             generator = "users_sequence"
     )
-    private int id;
+    private Long id;
 
     @NotEmpty(message = "First Name cannot be empty")
     @Column(name = "first_name")

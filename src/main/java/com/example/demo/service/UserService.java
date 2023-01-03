@@ -11,5 +11,7 @@ public interface UserService {
     public User saveUser(User user);
 
     public LoginResponse loginUser(LoginRequest loginRequest) throws IOException;
+
+    public User getUserDetails(Long id);
  
 }

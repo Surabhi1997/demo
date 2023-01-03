@@ -47,4 +47,21 @@ public class UserServiceImpl implements UserService {
                 .token(token)
                 .build();
     }
+
+    // cart-service communicate
+    public User getUserDetails(Long id) {
+        User dbUser = userRepository.findById(id).get();
+        User newUser = new User();
+        newUser.setFirstName(dbUser.getFirstName());
+        newUser.setLastName(dbUser.getLastName());
+        newUser.setEmail(dbUser.getEmail());
+        newUser.setRole(dbUser.getRole());
+        newUser.setPassword(dbUser.getPassword());
+        newUser.setMobile(dbUser.getMobile());
+        newUser.setId(dbUser.getId());
+        newUser.setCreatedAt(dbUser.getCreatedAt());
+        newUser.setUpdatedAt(dbUser.getUpdatedAt());
+        return newUser;
+    }
+
 }
